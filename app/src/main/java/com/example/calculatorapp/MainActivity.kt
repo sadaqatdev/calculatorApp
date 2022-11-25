@@ -1,6 +1,9 @@
+@file:OptIn(ExperimentalComposeUiApi::class)
+
 package com.example.calculatorapp
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.BorderStroke
@@ -9,9 +12,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MyApp {
-                TopHeader()
+//                TopHeader()
                 MainContent()
             }
         }
@@ -55,10 +59,10 @@ fun TopHeader() {
             horizontalAlignment = Alignment.CenterHorizontally,
 
             ) {
-            Text(text = "Total Persons", style = MaterialTheme.typography.headlineMedium)
+            Text(text = "Total Persons", style = MaterialTheme.typography.h4)
             Text(
                 text = "$ 1784",
-                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
+                style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.ExtraBold)
             )
         }
 
@@ -77,14 +81,22 @@ fun MyApp(content: @Composable () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Preview
 @Composable
 fun MainContent() {
+    BillForm(billAmt = {
+            it -> println("Value is change $it")
+    })
 
-    var textFieldValue = remember { mutableStateOf("") }
+}
 
-    var isValid = remember(textFieldValue.value) {
+@Composable
+fun BillForm(modifier: Modifier = Modifier, billAmt: (String) -> Unit) {
+    val textFieldValue = remember { mutableStateOf("") }
+
+    val isValid = remember(textFieldValue.value) {
+        println("is valid call")
+        billAmt(textFieldValue.value.trim().toString())
         textFieldValue.value.trim().isNotEmpty()
     }
 
@@ -92,13 +104,15 @@ fun MainContent() {
 
     Surface(
         modifier = Modifier
-            .padding(2.dp)
-            .fillMaxWidth(),
+            .padding(12.dp)
+            .fillMaxWidth()
+            .height(150.dp),
+        shadowElevation=0.dp,
         shape = RoundedCornerShape(corner = CornerSize(12.dp)),
         border = BorderStroke(color = Color.Gray, width = 1.dp)
     ) {
 
-        Column() {
+        Column(verticalArrangement = Arrangement.Center,  ) {
             InputFiled(
 
                 valueState = textFieldValue,
@@ -106,8 +120,18 @@ fun MainContent() {
                 enable = true,
                 onAction = KeyboardActions {
                     if (!isValid) return@KeyboardActions
+                    println("keyboard is hide")
                     keyboardController?.hide()
-                }, modifier = Modifier.padding(all = 2.dp).fillMaxWidth())
+                }, modifier = Modifier
+                    .padding(all = 4.dp)
+                    .fillMaxWidth()
+            )
+
+            if(isValid){
+                Row {
+                    Text(text = "Split",modifier= Modifier.align(alignment = Alignment.CenterHorizontally))
+                }
+            }
         }
 
     }
